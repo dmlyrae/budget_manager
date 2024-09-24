@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string_view>
 #include "parser.h"
+#include "date.h"
 
 using namespace std;
 
@@ -20,7 +21,21 @@ void ParseAndProcessQuery(BudgetManager& manager, string_view line) {
         return;
     }
 
-    std::cout << parts[0] << " " << parts[1] << " " << parts[2] << endl;
+    Date date_from = Date::FromString(parts[1]);
+    Date date_to = Date::FromString(parts[2]);
+
+    if (parts[0] == "ComputeIncome") {
+        ReadQuery read_query(date_from, date_to);
+        read_query.Print(manager, std::cout);
+    } else if (parts[0] == "PayTax") {
+        PayQuery pay_query(date_from, date_to);
+        pay_query.Process(manager);
+    } else if (parts[0] == "Earn" && parts.size() == 4) {
+        size_t sum = static_cast<size_t>(stoi(string(parts[3])));
+        IncomeQuery income(date_from, date_to, sum);
+        income.Process(manager);
+    }
+
 }
 
 int main() {
